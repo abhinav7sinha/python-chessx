@@ -3,7 +3,7 @@ os.system('cls' if os.name == 'nt' else 'clear')
 
 import chess
 
-class PostionXAI:
+class PositionXAI:
     def __init__(self, fen):
         self.fen=fen
         self.board=chess.Board(fen)
