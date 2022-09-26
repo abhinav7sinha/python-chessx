@@ -13,3 +13,4 @@ class PositionXAI:
         generate all explanations for the current position
         '''
         pass
+
