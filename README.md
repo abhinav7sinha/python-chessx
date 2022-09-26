@@ -1,2 +1,2 @@
 # python-chess-xai
-Generate natural language commentary for moves/positions in a game of chess
+An explainable chess AI that generates natural language commentary for positions, moves in a game of chess
