@@ -1,6 +1,3 @@
-import os
-os.system('cls' if os.name == 'nt' else 'clear')
-
 from collections import defaultdict
 import chess
 
