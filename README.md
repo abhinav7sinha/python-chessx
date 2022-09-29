@@ -1,6 +1,9 @@
 # python-chessx
 A chess XAI program
 
+![Tests](https://github.com/abhinav7sinha/python-chess-xai/actions/workflows/tests.yml/badge.svg)
+
+
 1. [Introduction](#introduction)
 2. [Dependencies](#dependencies)
 3. [Features](#features)
@@ -21,7 +24,7 @@ pip install -e .
 * Provides a utility to generate explanations from a FEN representation of a chess position based on Piece Square Tables
   ```python
   import chessx.psqt as psqt
-  
+
   fen_str='rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9'
   psqt_util=psqt.PSQT(fen_str)
 
