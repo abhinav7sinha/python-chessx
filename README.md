@@ -1,7 +1,7 @@
 # python-chessx
 A chess XAI program
 
-![Tests](https://github.com/abhinav7sinha/python-chess-xai/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/abhinav7sinha/python-chessx/actions/workflows/tests.yml/badge.svg)
 
 
 1. [Introduction](#introduction)
