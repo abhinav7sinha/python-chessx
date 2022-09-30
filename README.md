@@ -5,6 +5,8 @@ A chess XAI program
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/chessx)
 ![PyPI](https://img.shields.io/pypi/v/chessx)
 ![GitHub last commit](https://img.shields.io/github/last-commit/abhinav7sinha/python-chessx)
+![PyPI - Implementation](https://img.shields.io/pypi/implementation/chessx)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/chess)
 
 
 1. [Introduction](#introduction)
