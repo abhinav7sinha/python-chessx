@@ -2,6 +2,7 @@
 A chess XAI program
 
 ![Tests](https://github.com/abhinav7sinha/python-chessx/actions/workflows/tests.yml/badge.svg)
+![GitHub last commit](https://img.shields.io/github/last-commit/abhinav7sinha/python-chessx)
 
 
 1. [Introduction](#introduction)
@@ -14,7 +15,7 @@ python-chessx is an explainable chess AI that generates commentary for positions
 ## 2. Dependencies<a name="dependencies"/>
 
 * Python3 - [Download and Install Python3](https://www.python.org/downloads/). You can also use your system's package manager to install the latest stable version of python3.
-* Run the following commands (preferrably in a virtual environment):
+* For dev work, run the following commands (preferrably in a virtual environment):
 ```bash
 pip install -e .
 ```
