@@ -2,6 +2,8 @@
 A chess XAI program
 
 ![Tests](https://github.com/abhinav7sinha/python-chessx/actions/workflows/tests.yml/badge.svg)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/chessx)
+![PyPI](https://img.shields.io/pypi/v/chessx)
 ![GitHub last commit](https://img.shields.io/github/last-commit/abhinav7sinha/python-chessx)
 
 
