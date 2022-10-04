@@ -1,5 +1,5 @@
 import unittest
-import chessx.psqt as psqt
+import chessx.heuristic as heuristic
 
 
 class TestPSQT(unittest.TestCase):
@@ -8,7 +8,7 @@ class TestPSQT(unittest.TestCase):
         Test Piece Square Tables for each piece
         '''
         fen_str = 'rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9'
-        psqt_util = psqt.PSQT(fen_str)
+        psqt_util = heuristic.PSQT(fen_str)
 
         psqt_map = psqt_util.psqt_map
 
@@ -24,7 +24,7 @@ class TestPSQT(unittest.TestCase):
         Test PSQT explanations
         '''
         fen_str_1 = 'rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9'
-        psqt_util = psqt.PSQT(fen_str_1)
+        psqt_util = heuristic.PSQT(fen_str_1)
 
         exp_list = psqt_util.get_explanations()
 
