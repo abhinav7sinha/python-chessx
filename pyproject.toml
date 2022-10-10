@@ -21,3 +21,6 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 no_implicit_reexport = true
+
+[tool.check-manifest]
+ignore = ["*.ipynb"]

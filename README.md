@@ -5,11 +5,14 @@ A chess XAI program
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/chessx)
 ![PyPI](https://img.shields.io/pypi/v/chessx)
 ![GitHub last commit](https://img.shields.io/github/last-commit/abhinav7sinha/python-chessx)
+![PyPI - Implementation](https://img.shields.io/pypi/implementation/chessx)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/chess)
 
 
 1. [Introduction](#introduction)
 2. [Dependencies](#dependencies)
 3. [Features](#features)
+4. [Tests](#tests)
 
 ## 1. Introduction<a name="introduction"/>
 python-chessx is an explainable chess AI that generates commentary for positions/moves in a game of chess.
@@ -38,4 +41,10 @@ pip install -e .
   print('PSQT Explanations:')
   for exp in exp_list:
       print(exp)
+  ```
+
+  ## 3. Tests<a name="tests"/>
+  The following command to runs unit tests on the project:
+  ```bash
+  pytest
   ```
