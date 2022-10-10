@@ -1,3 +1,4 @@
+from __future__ import annotations
 from collections import defaultdict
 from typing import Dict, List
 from abc import ABC, abstractmethod
@@ -20,7 +21,64 @@ class TrappedPieces:
             'p': 1, 'n': 3, 'b': 3, 'r': 5, 'q': 9, 'k': 200
         }
 
+    def check_en_prise(self, from_sq: int, to_sq: int) -> bool:
+        curr_piece=self.board.piece_at(from_sq)
+        curr_color=self.board.color_at(from_sq)
+        curr_piece_val=self.piece_val_map[curr_piece.symbol().lower()]
+        tboard=chess.Board(self.fen)
+        tboard.push(chess.Move(from_square=from_sq, to_square=to_sq))
+        
+        defenders=tboard.attackers(curr_color, to_sq)
+        attackers=tboard.attackers(not curr_color, to_sq)
+
+        len_a=len(attackers)
+        len_d=len(defenders)
+
+        # if there are no defenders but there are attackers then return True
+        if len_a>0 and len_d==0:
+            return True
+        
+        if len_a==0:
+            return False
+
+        # If any of the attackers have lower piece val than that of curr_piece,
+        # return True
+        for att_piece in attackers:
+            if self.piece_val_map[tboard.piece_at(att_piece).symbol().lower()]<curr_piece_val:
+                return True
+        
+        attackers_val=[self.piece_val_map[tboard.piece_at(att_piece).symbol().lower()] for att_piece in attackers]
+        attackers_val=sorted(attackers_val)
+        defenders_val=[self.piece_val_map[tboard.piece_at(def_piece).symbol().lower()] for def_piece in defenders]
+        defenders_val=sorted(defenders_val)
+        a=0
+        d=0
+        score=0
+        temp=curr_piece_val
+        while a<len_a and d<len_d:
+            if attackers_val[a]<defenders_val[d] and score<=0:
+                return False
+            else:
+                score+=temp-attackers_val[a]
+                temp=defenders_val[d]
+                a+=1
+                d+=1
+        if len_a>len_d:
+            score+=temp-attackers_val[a]
+            if score<=0:
+                return False
+            else:
+                return True
+        elif score<=0:
+            return False
+        else:
+            return True
+
+
     def get_trapped_pieces(self) -> Dict[str, List[int]]:
+        '''
+        Returns list of all trapped pieces in a position
+        '''
         trapped_pieces=defaultdict(list)
         for i in range(64):
             if self.board.piece_at(i)!=None and self.board.piece_at(i).piece_type>1 and self.is_trapped(i):
@@ -28,36 +86,66 @@ class TrappedPieces:
         return trapped_pieces
 
     def is_trapped(self, curr_sq: int) -> bool:
+        '''
+        Returns True if piece at the given input square is trapped,
+        else Returns False
+        '''
         # get list of all possible squares that the current piece can go to
-        attacked_squares=[]
+        possible_squares=[]
         curr_col=self.board.color_at(curr_sq)
         for sq in self.board.attacks(curr_sq):
             if self.board.piece_at(sq) != None and self.board.piece_at(sq).color is curr_col:
                 continue
-            attacked_squares.append(sq)
+            possible_squares.append(sq)
         
-        possible_sqs=len(attacked_squares)
-        enemy_sqs=0
-        for sq in attacked_squares:
-            # get attacker's squares of sq
-            attacker_sqs=self.board.attackers(not curr_col, sq)
-            for a_sq in attacker_sqs:
-                if self.piece_val_map[self.board.piece_at(a_sq).symbol().lower()] < \
-                    self.piece_val_map[self.board.piece_at(a_sq).symbol().lower()]:
-                    enemy_sqs+=1
-                    break
-            if possible_sqs-enemy_sqs==0:
-                return True
-            else:
+        # if the piece is not attacking any sqaures -> then check if 
+        # it's at it's starting square -> in that case -> it's not trapped
+        if len(possible_squares)==0:
+            if curr_sq==0 and self.board.piece_at(curr_sq).symbol()=='R':
                 return False
+            elif curr_sq==2 and self.board.piece_at(curr_sq).symbol()=='B':
+                return False
+            elif curr_sq==5 and self.board.piece_at(curr_sq).symbol()=='B':
+                return False
+            elif curr_sq==7 and self.board.piece_at(curr_sq).symbol()=='R':
+                return False
+            elif curr_sq==56 and self.board.piece_at(curr_sq).symbol()=='r':
+                return False
+            elif curr_sq==58 and self.board.piece_at(curr_sq).symbol()=='b':
+                return False
+            elif curr_sq==61 and self.board.piece_at(curr_sq).symbol()=='b':
+                return False
+            elif curr_sq==63 and self.board.piece_at(curr_sq).symbol()=='r':
+                return False
+
+        # Check if all these possible squares are defended by the opposite side
+        num_possible_sqs=len(possible_squares)
+        num_defended_sqs=0
+        # for sq in possible_squares:
+        #     # get attackers of the possible squares
+        #     attacker_sqs=self.board.attackers(not curr_col, sq)
+        #     for a_sq in attacker_sqs:
+        #         if self.piece_val_map[self.board.piece_at(a_sq).symbol().lower()] < \
+        #             self.piece_val_map[self.board.piece_at(curr_sq).symbol().lower()]:
+        #             num_defended_sqs+=1
+        #             break
+        for sq in possible_squares:
+            if self.check_en_prise(from_sq=curr_sq, to_sq=sq):
+                num_defended_sqs+=1
+
+        if num_possible_sqs-num_defended_sqs==0:
+            return True
+        else:
+            return False
 
     def get_explanations(self) -> List[str]:
         trapped_pieces=self.get_trapped_pieces()
         explanation_list = []
-        for piece, square in trapped_pieces.items():
+        for piece in trapped_pieces:
             color='White' if piece.isupper() else 'Black'
-            sq=chess.square_name(square)
-            explanation_list.append(f'{color} {self.piece_name[piece.lower()]} at {sq} is trapped')
+            for square in trapped_pieces[piece]:
+                sq=chess.square_name(square)
+                explanation_list.append(f'{color} {self.piece_name[piece.lower()]} at {sq} is trapped')
         return explanation_list
         
 
@@ -202,14 +290,15 @@ class PSQT(Heuristic):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    fen_str = 'rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9'
-    psqt = PSQT(fen_str)
-    exp_list = psqt.get_explanations()
-    print('PSQT Explanations:')
-    for ex in exp_list:
-        print(ex)
-    print()
-    tp = TrappedPieces('rn1qk1nr/pppppppp/6b1/5P1P/6P1/8/PPPP4/RNBQKBNR w KQkq - 0 1')
+    # fen_str = 'rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9'
+    # psqt = PSQT(fen_str)
+    # exp_list = psqt.get_explanations()
+    # print('PSQT Explanations:')
+    # for ex in exp_list:
+    #     print(ex)
+    # print()
+    # tp = TrappedPieces('rn1qk1nr/pppppppp/6b1/5P1P/6P1/8/PPPP4/RNBQKBNR w KQkq - 0 1')
+    tp=TrappedPieces('r5k1/p4p1p/2p3pb/2N1n2n/1p2PP2/1B2B1PP/PP4K1/3R4 b - - 0 24')
     exp_list = tp.get_explanations()
     print('TrappedPieces Explanations:')
     for ex in exp_list:
