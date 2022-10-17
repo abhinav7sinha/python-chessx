@@ -9,6 +9,82 @@ class Heuristic(ABC):
     def get_explanations(self) -> List[str]:
         pass
 
+
+class PinnedPieceType:
+    def __init__(self, piece_sq: int, pinned_to_sq: int, pinned_by_sq: int) -> None:
+        self.piece_sq = piece_sq
+        self.pinned_to_sq = pinned_to_sq
+        self.pinned_by_sq = pinned_by_sq
+    
+    def __str__(self):
+        return (f'piece_sq: {self.piece_sq}, pinned_to_sq: {self.pinned_to_sq}, pinned_by_sq: {self.pinned_by_sq}')
+
+
+class PinnedPieces:
+    '''
+    a pin is a chess tactic in which a defending piece cannot move without exposing a more 
+    valuable defending piece on its other side to capture by the attacking piece
+    '''
+
+    def __init__(self, fen: str) -> None:
+        self.fen = fen
+        self.board = chess.Board(self.fen)
+        self.piece_name = {'p': 'Pawn', 'n': 'Knight', 'b': 'Bishop', 'r': 'Rook', 'q': 'Queen', 'k': 'King'}
+        self.piece_val_map = {
+            'p': 1, 'n': 3, 'b': 3, 'r': 5, 'q': 9, 'k': 200
+        }
+
+    def get_pinned_pieces(self):
+        pass
+
+    def get_absolute_pins(self) -> List(PinnedPieceType):
+        '''
+        An absolute pin is one where the piece shielded by the pinned piece is the king.
+        '''
+        pinned_pieces=[]
+        colors=[chess.BLACK, chess.WHITE]
+        for color in colors:
+            for sq in range(64):
+                if self.board.is_pinned(color, sq):
+                    pinned_piece=PinnedPieceType(piece_sq=sq, pinned_to_sq=self.board.king(color), pinned_by_sq=-1)
+                    potential_pinned_by_sqs=[]
+                    for sq2 in self.board.pin(color, sq):
+                        if self.board.color_at(sq2) is not None and self.board.color_at(sq2) is not color and self.board.piece_at(sq2).symbol().lower()!='p':
+                            potential_pinned_by_sqs.append(sq2)
+                    if len(potential_pinned_by_sqs)==1:
+                        pinned_piece.pinned_by_sq=potential_pinned_by_sqs[0]
+                    else:
+                        base_dist=self.board.king(color)-sq
+                        min_dist=64
+                        for i in range(len(potential_pinned_by_sqs)):
+                            if base_dist>0:
+                                if sq-potential_pinned_by_sqs[i]>0 and sq-potential_pinned_by_sqs[i]<min_dist:
+                                    pinned_piece.pinned_by_sq=potential_pinned_by_sqs[i]
+                                    min_dist=sq-potential_pinned_by_sqs[i]
+                            else:
+                                if sq-potential_pinned_by_sqs[i]<0 and potential_pinned_by_sqs[i]-sq<min_dist:
+                                    pinned_piece.pinned_by_sq=potential_pinned_by_sqs[i]
+                                    min_dist=potential_pinned_by_sqs[i]-sq
+                    pinned_pieces.append(pinned_piece)
+        return pinned_pieces
+
+
+    def get_explanations(self) -> List[str]:
+        '''
+        Returns list of explanations corresponding to each pinned piece
+        '''
+        pinned_pieces = self.get_absolute_pins()
+        explanation_list = []
+        for piece in pinned_pieces:
+            color='White' if self.board.color_at(piece.piece_sq) is True else 'Black'
+            explanation_list.append(f'{color} {self.piece_name[self.board.piece_at(piece.piece_sq).symbol().lower()]} '\
+                f'at {chess.square_name(piece.piece_sq)} is pinned to its '
+                f'{self.piece_name[self.board.piece_at(piece.pinned_to_sq).symbol().lower()]} '
+                f'at {chess.square_name(piece.pinned_to_sq)} by the opponent\'s '
+                f'{self.piece_name[self.board.piece_at(piece.pinned_by_sq).symbol().lower()]} '
+                f'at {chess.square_name(piece.pinned_by_sq)}')
+        return explanation_list      
+
 class TrappedPieces:
     '''
     if all squares that a piece can go to are controlled by the opponent, then the piece is trapped.
@@ -139,6 +215,9 @@ class TrappedPieces:
             return False
 
     def get_explanations(self) -> List[str]:
+        '''
+        Returns list of explanations corresponding to each trapped piece
+        '''
         trapped_pieces=self.get_trapped_pieces()
         explanation_list = []
         for piece in trapped_pieces:
@@ -290,16 +369,27 @@ class PSQT(Heuristic):
 
 
 if __name__ == '__main__':  # pragma: no cover
-    # fen_str = 'rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9'
-    # psqt = PSQT(fen_str)
-    # exp_list = psqt.get_explanations()
-    # print('PSQT Explanations:')
-    # for ex in exp_list:
-    #     print(ex)
-    # print()
+    psqt_fen = 'rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9'
+    psqt = PSQT(psqt_fen)
+    exp_list = psqt.get_explanations()
+    print('PSQT Explanations:')
+    for ex in exp_list:
+        print(ex)
+    print()
+
+    tp_fen='r5k1/p4p1p/2p3pb/2N1n2n/1p2PP2/1B2B1PP/PP4K1/3R4 b - - 0 24'
     # tp = TrappedPieces('rn1qk1nr/pppppppp/6b1/5P1P/6P1/8/PPPP4/RNBQKBNR w KQkq - 0 1')
-    tp=TrappedPieces('r5k1/p4p1p/2p3pb/2N1n2n/1p2PP2/1B2B1PP/PP4K1/3R4 b - - 0 24')
+    tp=TrappedPieces(tp_fen)
     exp_list = tp.get_explanations()
     print('TrappedPieces Explanations:')
     for ex in exp_list:
         print(ex)   
+    print()
+    
+    pin_fen='1rk5/8/4n3/5B2/1N6/8/8/1Q1K4 b - - 0 1'
+    pin=PinnedPieces(pin_fen)
+    exp_list = pin.get_explanations()
+    print('PinnedPieces Explanations:')
+    for ex in exp_list:
+        print(ex)  
+    print() 
