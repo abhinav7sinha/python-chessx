@@ -27,12 +27,14 @@ pip install -e .
 
 ## 3. Features<a name="features"/>
 
-* Provides a utility to generate explanations from a FEN representation of a chess position based on Piece Square Tables
+* Provides a utility to generate explanations from a FEN representation of a chess position.
+  1. Piece Square Tables
   ```python
-  import chessx.psqt as psqt
+  import chessx.heuristic as heuristic
+  import chess
 
-  fen_str='rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9'
-  psqt_util=psqt.PSQT(fen_str)
+  psqt_fen = 'rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9'
+  psqt_util=heuristic.PSQT(psqt_fen)
 
   # generate list of explanations
   exp_list=psqt_util.get_explanations()
@@ -42,9 +44,36 @@ pip install -e .
   for exp in exp_list:
       print(exp)
   ```
+  2. Trapped Pieces
+  ```python
+  tp_fen='r5k1/p4p1p/2p3pb/2N1n2n/1p2PP2/1B2B1PP/PP4K1/3R4 b - - 0 24'
+  tp_util=heuristic.TrappedPieces(tp_fen)
 
-  ## 3. Tests<a name="tests"/>
-  The following command to runs unit tests on the project:
-  ```bash
-  pytest
+  # generate list of explanations
+  exp_list=tp_util.get_explanations()
+
+  # print explanations
+  print('Trapped Pieces Explanations:')
+  for exp in exp_list:
+      print(exp)
+  ```
+  3. Pinned Pieces
+  ```python
+  pin_fen='1rk5/8/4n3/5B2/1N6/8/8/1Q1K4 b - - 0 1'
+  pin_util=heuristic.PinnedPieces(pin_fen)
+
+  # generate list of explanations
+  exp_list = pin_util.get_explanations()
+
+  # print explanations
+  print('PinnedPieces Explanations:')
+  for ex in exp_list:
+      print(ex)  
+  print()
+  ``` 
+
+## 3. Tests<a name="tests"/>
+The following command to runs unit tests on the project:
+```bash
+pytest
   ```
